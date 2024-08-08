@@ -1,0 +1,7 @@
+---
+# vars file for pi-install
+nmtui:
+  inf: "end0"
+  type: "ethernet"
+  ip4: "192.168.0.100"
+  gw4: "192.168.0.1"

@@ -1,0 +1,94 @@
+{
+    "log": {
+      "level": "debug"
+    },
+    "dns": {
+      "servers": [
+        {
+          "address": "https://1.1.1.1/dns-query",
+          "tag": "cf"
+        },
+        {
+          "tag": "local",
+          "address": "192.168.0.100",
+          "detour": "direct"
+        },
+        {
+          "tag": "block",
+          "address": "rcode://success"
+        }
+      ]
+    },
+    "inbounds": [
+      {
+        "type": "tun",
+        "stack": "system",
+        "domain_strategy": "ipv4_only",
+        "inet4_address": [
+                "172.18.0.1/30"
+        ],
+        "mtu": 1500,
+        "auto_route": true,
+        "strict_route": true,
+        "sniff": true
+      }
+    ],
+    "outbounds": [
+          {
+              "flow": "xtls-rprx-vision",
+              "server": "{{ secrets.sing_box.vless_ip }}",
+              "server_port": 443,
+              "tag": "vless",
+              "tls": {
+                  "enabled": true,
+                  "reality": {
+                      "enabled": true,
+                      "public_key": "{{ secrets.sing_box.vless_pbk }}",
+                      "short_id": "{{ secrets.sing_box.vless_sid }}"
+                  },
+                  "server_name": "{{ secrets.sing_box.vless_sni }}",
+                  "utls": {
+                      "enabled": true,
+                      "fingerprint": "chrome"
+                  }
+              },
+              "type": "vless",
+              "uuid": "{{ secrets.sing_box.vless_uuid }}"
+          },
+      {
+        "type": "direct",
+        "tag": "direct"
+      },
+      {
+        "type": "dns",
+        "tag": "dns-out"
+      },
+      {
+        "tag": "block",
+        "type": "block"
+      }
+    ],
+    "route": {
+      "final": "vless",
+      "auto_detect_interface": true,
+      "rules": [
+        {
+          "protocol": "dns",
+          "outbound": "dns-out"
+        },
+        {
+          "protocol": [
+            "quic"
+          ],
+          "outbound": "block"
+        },
+        {
+          "domain_suffix": [
+            ".ru",
+            ".hk"
+          ],
+          "outbound": "direct"
+        }
+      ]
+    }
+  }

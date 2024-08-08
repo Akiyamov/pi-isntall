@@ -1,0 +1,52 @@
+---
+# tasks file for pi-install
+- name: Set IP forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+- name: Set default gateway to specified 
+  community.general.nmcli:
+    conn_name: "{{ nmtui.inf }}"
+    ifname: "{{ nmtui.inf }}"
+    type: "{{ nmtui.type }}"
+    ip4: "{{ nmtui.ip4 }}"
+    gw4: "{{ nmtui.gw4 }}"
+    state: present
+- name: Make directories for compose files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /opt/docker/sing-box
+    - /opt/docker/pihole
+- name: Copy compose file for Pihole
+  ansible.builtin.template:
+    src: pihole.yml.j2
+    dest: /opt/docker/pihole/docker-compose.yml
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Copy compose file for sing-box
+  ansible.builtin.template:
+    src: sing-box.yml.j2
+    dest: /opt/docker/sing-box/docker-compose.yml
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Copy config file for sing-box
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: /etc/sing-box/config.json
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Start services
+  community.docker.docker_compose:
+    project_src: "{{ item }}"
+  register: output
+  with_items:
+    - /opt/docker/sing-box/
+    - /opt/docker/pihole/

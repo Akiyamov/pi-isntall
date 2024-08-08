@@ -1,0 +1,8 @@
+---
+- name: Setup Pi(debian 12, 6.1)
+  hosts: zero3
+  vars_files:
+    - pi-install/vars/main.yml
+    - pi-install/vars/secrets.yml
+  roles:
+   - pi-install
