@@ -1,38 +1,49 @@
-Role Name
+Pi-install
 =========
 
-A brief description of the role goes here.
+Installs containers on *-pi.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Docker installed. By default debian 12 for orange-pi has docker.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+`nmtui` config for network;  
+`nmtui.inf` interface;  
+`nmtui.type` type of interface;
+`nmtui.ip4` ip4 of pi for static ip and dns;  
+`nmtui.gw4` ip4 of main router.  
 
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+`secrets` secrets;  
+`secrets.sing_box` secrets for sing-box;  
+`secrets.sing_box.vless_ip` ip of proxy server;  
+`secrets.sing_box.vless_pbk` public key on xray;  
+`secrets.sing_box.vless_sid` short id on xray;
+`secrets.sing_box.vless_sni` sni on xray;  
+`secrets.sing_box.vless_uuid` uuid of connection on xray.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
+```yaml
+---
+- name: Setup Pi(debian 12, 6.1)
+  hosts: zero3
+  vars_files:
+    - pi-install/vars/main.yml
+    - pi-install/vars/secrets.yml
+  roles:
+   - pi-install
+```
 License
 -------
 
-BSD
+None, i don't know any
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Cool a bit.

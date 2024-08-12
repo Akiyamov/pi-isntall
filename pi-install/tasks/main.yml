@@ -9,30 +9,23 @@
     reload: true
 - name: Set default gateway to specified 
   community.general.nmcli:
-    conn_name: "{{ nmtui.inf }}"
+    conn_name: "Wired connection 1"
     ifname: "{{ nmtui.inf }}"
     type: "{{ nmtui.type }}"
     ip4: "{{ nmtui.ip4 }}"
     gw4: "{{ nmtui.gw4 }}"
+    dns4: "{{ nmtui.ip4 }}"
     state: present
 - name: Make directories for compose files
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
   loop:
-    - /opt/docker/sing-box
-    - /opt/docker/pihole
-- name: Copy compose file for Pihole
+    - /opt/docker
+- name: Copy compose file 
   ansible.builtin.template:
-    src: pihole.yml.j2
-    dest: /opt/docker/pihole/docker-compose.yml
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-- name: Copy compose file for sing-box
-  ansible.builtin.template:
-    src: sing-box.yml.j2
-    dest: /opt/docker/sing-box/docker-compose.yml
+    src: compose.yml.j2
+    dest: /opt/docker/docker-compose.yml
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -48,5 +41,4 @@
     project_src: "{{ item }}"
   register: output
   with_items:
-    - /opt/docker/sing-box/
-    - /opt/docker/pihole/
+    - /opt/docker

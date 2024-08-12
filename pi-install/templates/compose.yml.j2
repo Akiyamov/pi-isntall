@@ -1,0 +1,29 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    dns: 127.0.0.1
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: 'Asia/Yekaterinburg'
+      PIHOLE_DNS_: "77.88.8.8;77.88.8.1"
+      WEBPASSWORD: ""
+    volumes:
+      - '/etc/pihole:/etc/pihole'
+      - '/etc/dnsmasq.d:/etc/dnsmasq.d'
+    restart: unless-stopped
+  sing-box:
+    image: akiyamov/sing-box:1.10-beta
+    container_name: sing-box
+    restart: always
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - /etc/sing-box:/etc/sing-box/
+    command: -D /var/lib/sing-box -C /etc/sing-box/ run
