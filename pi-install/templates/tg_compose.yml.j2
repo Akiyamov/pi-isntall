@@ -1,0 +1,35 @@
+services:
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    environment:
+      TELEGRAM_API_ID: {{ secrets.tg_repost.api_id }}
+      TELEGRAM_API_HASH: {{ secrets.tg_repost.api_hash }}
+    ports:
+      - 8081:8081
+  repost-container:
+    depends_on:
+      - telegram-bot-api
+    image: akiyamov/telegramrepost:latest
+    volumes:
+      - ./video:/video
+      - ./env/.env:/opt/.env
+    restart: on-failure
+    user: "1024:1012"
+  repost-container-bloodstains:
+    depends_on:
+      - telegram-bot-api
+    image: akiyamov/telegramrepost:latest
+    volumes:
+      - ./video:/video
+      - ./env/.env_bloodstains:/opt/.env
+    restart: on-failure
+    user: "1024:1012"
+  repost-container-whatsthere:
+    depends_on:
+      - telegram-bot-api
+    image: akiyamov/telegramrepost:latest
+    volumes:
+      - ./video:/video
+      - ./env/.env_whatsthere:/opt/.env
+    restart: on-failure
+    user: "1024:1012"

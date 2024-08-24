@@ -22,10 +22,21 @@
     state: directory
   loop:
     - /opt/docker
-- name: Copy compose file 
+    - /opt/dpidetector-node
+    - /opt/docker/tg-bot
+    - /opt/docker/tg-bot/video
+    - /opt/docker/tg-bot/env
+- name: Copy network compose file 
   ansible.builtin.template:
-    src: compose.yml.j2
+    src: sing_compose.yml.j2
     dest: /opt/docker/docker-compose.yml
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Copy repost compose file 
+  ansible.builtin.template:
+    src: tg_compose.yml.j2
+    dest: /opt/docker/tg-bot/docker-compose.yml
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -36,9 +47,43 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
-- name: Start services
+- name: Copy config file for tg-repost-bts
+  ansible.builtin.template:
+    src: .env.j2
+    dest: /opt/docker/tg-bot/env/.env
+    owner: 1024
+    group: 1012
+    mode: u=rw,g=r,o=r
+- name: Copy config file for tg-repost-bst
+  ansible.builtin.template:
+    src: .env_bst.j2
+    dest: /opt/docker/tg-bot/env/.env_bloodstains
+    owner: 1024
+    group: 1012
+    mode: u=rw,g=r,o=r
+- name: Copy config file for tg-repost-wts
+  ansible.builtin.template:
+    src: .env_wts.j2
+    dest: /opt/docker/tg-bot/env/.env_whatsthere
+    owner: 1024
+    group: 1012
+    mode: u=rw,g=r,o=r
+- name: Checkout DPIDetector
+  ansible.builtin.git:
+    repo: 'https://github.com/DPIdetector/dpidetector-node.git'
+    dest: /opt/dpidetector-node
+- name: Copy DPIDetector config
+  ansible.builtin.template:
+    src: user.conf.j2
+    dest: /opt/dpidetector-node/user.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+- name: Start network services
   community.docker.docker_compose:
     project_src: "{{ item }}"
   register: output
   with_items:
     - /opt/docker
+    - /opt/dpidetector
+    - /opt/docker/tg-bot

@@ -1,146 +1,198 @@
 {
-    "log": {
-      "level": "debug"
-    },
-    "dns": {
-      "servers": [
-        {
-          "address": "https://1.1.1.1/dns-query",
-          "tag": "cf"
-        },
-        {
-          "tag": "local",
-          "address": "192.168.0.100",
-          "detour": "direct"
-        },
-        {
-          "tag": "block",
-          "address": "rcode://success"
-        }
-      ]
-    },
-    "inbounds": [
+  "log": {
+    "level": "debug"
+  },
+  "dns": {
+    "servers": [
       {
-        "type": "tun",
-        "stack": "system",
-        "domain_strategy": "ipv4_only",
-        "inet4_address": [
-                "172.18.0.1/30"
-        ],
-        "mtu": 1500,
-        "auto_route": true,
-        "strict_route": true,
-        "sniff": true
-      }
-    ],
-    "outbounds": [
-          {
-              "flow": "xtls-rprx-vision",
-              "server": "{{ secrets.sing_box.vless_ip }}",
-              "server_port": 443,
-              "tag": "vless",
-              "tls": {
-                  "enabled": true,
-                  "reality": {
-                      "enabled": true,
-                      "public_key": "{{ secrets.sing_box.vless_pbk }}",
-                      "short_id": "{{ secrets.sing_box.vless_sid }}"
-                  },
-                  "server_name": "{{ secrets.sing_box.vless_sni }}",
-                  "utls": {
-                      "enabled": true,
-                      "fingerprint": "chrome"
-                  }
-              },
-              "type": "vless",
-              "uuid": "{{ secrets.sing_box.vless_uuid }}"
-          },
-      {
-        "type": "direct",
-        "tag": "direct"
+        "address": "https://1.1.1.1/dns-query",
+        "tag": "cf"
       },
       {
-        "type": "dns",
-        "tag": "dns-out"
+        "tag": "local",
+        "address": "192.168.0.100",
+        "detour": "direct"
       },
       {
         "tag": "block",
-        "type": "block"
+        "address": "rcode://success"
       }
-    ],
-    "route": {
-      "final": "vless",
-      "auto_detect_interface": true,
-      "rules": [
-        {
-          "protocol": "dns",
-          "outbound": "dns-out"
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "stack": "system",
+      "domain_strategy": "ipv4_only",
+      "inet4_address": [
+        "172.18.0.1/30"
+      ],
+      "mtu": 1500,
+      "auto_route": true,
+      "strict_route": true,
+      "sniff": true
+    }
+  ],
+  "outbounds": [
+    {
+      "flow": "xtls-rprx-vision",
+      "server": "{{ secrets.sing_box.vless_ip }}",
+      "server_port": 443,
+      "tag": "vless",
+      "tls": {
+        "enabled": true,
+        "reality": {
+          "enabled": true,
+          "public_key": "{{ secrets.sing_box.vless_pbk }}",
+          "short_id": "{{ secrets.sing_box.vless_sid }}"
         },
-        {
-          "protocol": [
-            "quic"
-          ],
-          "outbound": "block"
-        },
-        {
-          "domain_suffix": [
-            ".ru",
-            ".hk",
-            ".xn--p1ai"
-          ],
-          "outbound": "direct"
-        },
-        {
-          "protocol": [
-            "bittorrent"
-          ],
-          "outbound": "block"
-        },
-        {
-          "domain": [
-            "mvk.com",
-            "userapi.com",
-            "vk-cdn.me",
-            "vk-cdn.net",
-            "vk-portal.net",
-            "vk.cc",
-            "vkuseraudio.net",
-            "vk.com",
-            "vk.design",
-            "vk.link",
-            "vk.me",
-            "vkcache.com",
-            "vkgo.app",
-            "vklive.app",
-            "vkmessenger.com",
-            "vkmessenger.app",
-            "vkontakte.ru",
-            "vkuseraudio.com",
-            "vkuserlive.net",
-            "vkuservideo.com",
-            "vkuservideo.net",
-            "cdn-telegram.org",
-            "comments.app",
-            "contest.com",
-            "fragment.com",
-            "graph.org",
-            "quiz.directory",
-            "t.me",
-            "tdesktop.com",
-            "telega.one",
-            "telegra.ph",
-            "telegram-cdn.org",
-            "telegram.dog",
-            "telegram.me",
-            "telegram.org",
-            "telegram.space",
-            "telesco.pe",
-            "tg.dev",
-            "tx.me",
-            "usercontent.dev"
-          ],
-          "outbound": "direct"
+        "server_name": "{{ secrets.sing_box.vless_sni }}",
+        "utls": {
+          "enabled": true,
+          "fingerprint": "chrome"
         }
-      ]
+      },
+      "type": "vless",
+      "uuid": "{{ secrets.sing_box.vless_uuid }}"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
+    {
+      "tag": "block",
+      "type": "block"
+    }
+  ],
+  "route": {
+    "geoip": {
+      "path": "/etc/sing-box/geoip.db",
+      "download_url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/geoip.db"
+    },
+    "geosite": {
+      "path": "/etc/sing-box/geosite.db",
+      "download_url": "https://github.com/savely-krasovsky/antizapret-sing-box/releases/latest/download/geosite.db"
+    },
+    "final": "direct",
+    "auto_detect_interface": true,
+    "rules": [
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "geoip": "antizapret",
+            "geosite": "antizapret"
+          },
+          {
+            "source_ip_cidr": [
+              "192.168.0.0/24"
+            ]
+          }
+        ],
+        "outbound": "vless"
+      },
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "protocol": [
+          "quic"
+        ],
+        "outbound": "block"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "geoip": "antizapret",
+            "geosite": "antizapret"
+          },
+          {
+            "source_ip_cidr": [
+              "172.18.0.1"
+            ]
+          }
+        ],
+        "outbound": "direct"
+      },
+      {
+        "domain_suffix": [
+          "24.ua",
+          "unian.net",
+          "ntc.party",
+          "speedtest.net",
+          "ggpht.com",
+          "googlevideo.com",
+          "youtube.com",
+          "ytimg.com",
+          "googleapis.com",
+          "e-hentai.org",
+          "ehgt.org",
+          "ehtracker.org",
+          "ehwiki.org",
+          "exhentai.org",
+          "hath.network",
+          "hentaiathome.net",
+          "hentaiverse.org",
+          "terraform.io",
+          "4cdn.org",
+          "4chan.org",
+          "4channel.org",
+          "ads-twitter.com",
+          "cms-twdigitalassets.com",
+          "periscope.tv",
+          "pscp.tv",
+          "t.co",
+          "tellapart.com",
+          "tweetdeck.com",
+          "twimg.com",
+          "twitpic.com",
+          "twitter.biz",
+          "twitter.com",
+          "twitter.jp",
+          "twittercommunity.com",
+          "twitterflightschool.com",
+          "twitterinc.com",
+          "twitteroauth.com",
+          "twitterstat.us",
+          "twtrdns.net",
+          "twttr.com",
+          "twttr.net",
+          "twvid.com",
+          "vine.co",
+          "x.com",
+          "booth.pm",
+          "fanbox.cc",
+          "pixiv.net",
+          "pixiv.org",
+          "pixiv.co.jp",
+          "pixiv.me",
+          "pximg.net",
+          "cooer.su",
+          "coomer.party",
+          "kemono.party",
+          "kemono.su",
+          "gelbooru.com",
+          "donmai.us",
+          "nyaa.si"
+        ],
+        "outbound": "vless"
+      }
+    ]
+  },
+  "experimental": {
+    "clash_api": {
+      "external_ui": "ui",
+      "external_controller": "0.0.0.0:9090",
+      "external_ui_download_detour": "direct",
+      "default_mode": "rule"
     }
   }
+}
